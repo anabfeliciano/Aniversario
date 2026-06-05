@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Casino Night – Matheus</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --red:#8B0000;
+  --red2:#B22222;
+  --gold:#FFD700;
+  --gold2:#FFA500;
+  --gold3:#DAA520;
+  --black:#0A0A0A;
+  --black2:#111;
+  --black3:#1a1a1a;
+  --neon-red:#FF2020;
+  --neon-gold:#FFE066;
+  --surface:#1C0A0A;
+  --surface2:#200D0D;
+  --card-bg:#15080A;
+}
+html,body{height:100%;overflow:hidden;background:var(--black);font-family:'Rajdhani',sans-serif;color:#fff}
+
+/* ─── SPLASH ─── */
+#splash{
+  position:fixed;inset:0;z-index:9999;
+  background:radial-gradient(ellipse at center, #3D0000 0%, #1A0000 40%, #000 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  transition:opacity 0.8s ease, transform 0.8s ease;
+}
+#splash.out{opacity:0;transform:scale(1.05);pointer-events:none}
+
+.splash-cards{position:absolute;width:100%;height:100%;overflow:hidden;pointer-events:none}
+.splash-card{
+  position:absolute;font-size:clamp(60px,15vw,120px);opacity:0.04;
+  animation:floatCard 8s ease-in-out infinite;
+}
+.splash-card:nth-child(1){top:5%;left:2%;animation-delay:0s}
+.splash-card:nth-child(2){top:5%;right:2%;animation-delay:1.5s;transform:rotate(15deg)}
+.splash-card:nth-child(3){bottom:5%;left:2%;animation-delay:3s;transform:rotate(-10deg)}
+.splash-card:nth-child(4){bottom:5%;right:2%;animation-delay:4.5s;transform:rotate(20deg)}
+.splash-card:nth-child(5){top:40%;left:-2%;animation-delay:2s;transform:rotate(-5deg);font-size:80px}
+.splash-card:nth-child(6){top:40%;right:-2%;animation-delay:3.5s;transform:rotate(5deg);font-size:80px}
+@keyframes floatCard{0%,100%{transform:translateY(0) rotate(0deg);opacity:0.04} 50%{transform:translateY(-20px) rotate(5deg);opacity:0.08}}
+
+.splash-chips{position:absolute;width:100%;height:100%;overflow:hidden;pointer-events:none}
+.chip{
+  position:absolute;width:40px;height:40px;border-radius:50%;
+  border:3px solid var(--gold3);opacity:0.08;
+  animation:chipFloat 6s ease-in-out infinite;
+}
+.chip:nth-child(1){top:15%;left:10%;background:var(--red);animation-delay:0s}
+.chip:nth-child(2){top:25%;right:15%;background:var(--gold3);animation-delay:2s}
+.chip:nth-child(3){bottom:20%;left:20%;background:var(--red2);animation-delay:1s}
+.chip:nth-child(4){bottom:30%;right:10%;background:var(--gold);animation-delay:3s}
+@keyframes chipFloat{0%,100%{transform:translateY(0);opacity:0.08} 50%{transform:translateY(-15px);opacity:0.15}}
+
+.splash-divider-top{
+  width:80%;max-width:300px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  margin-bottom:20px;
+  animation:glowLine 2s ease-in-out infinite;
+}
+.splash-divider-bot{
+  width:80%;max-width:300px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  margin-top:20px;
+  animation:glowLine 2s ease-in-out infinite;
+}
+@keyframes glowLine{0%,100%{opacity:0.5;width:60%} 50%{opacity:1;width:80%}}
+
+.splash-subtitle{
+  font-family:'Cinzel',serif;
+  font-size:clamp(11px,3.5vw,16px);
+  letter-spacing:0.4em;
+  color:var(--gold3);
+  text-transform:uppercase;
+  opacity:0;animation:fadeIn 0.8s ease 0.3s forwards;
+  margin-bottom:8px;
+}
+.splash-name{
+  font-family:'Cinzel',serif;
+  font-size:clamp(36px,12vw,72px);
+  font-weight:900;
+  color:var(--gold);
+  text-shadow:0 0 20px rgba(255,215,0,0.5),0 0 40px rgba(255,215,0,0.3),0 0 80px rgba(255,100,0,0.2);
+  letter-spacing:0.08em;
+  opacity:0;animation:fadeIn 0.8s ease 0.6s forwards;
+  line-height:1;
+}
+.splash-presents{
+  font-family:'Cinzel',serif;
+  font-size:clamp(9px,2.5vw,12px);
+  letter-spacing:0.5em;
+  color:rgba(255,215,0,0.6);
+  opacity:0;animation:fadeIn 0.8s ease 0.9s forwards;
+  margin-top:6px;margin-bottom:4px;
+}
+.splash-title{
+  font-family:'Cinzel',serif;
+  font-size:clamp(28px,10vw,64px);
+  font-weight:900;
+  color:#fff;
+  text-shadow:0 0 15px rgba(255,30,30,0.8),0 0 30px rgba(255,30,30,0.5),0 0 60px rgba(255,30,30,0.3);
+  letter-spacing:0.1em;
+  opacity:0;animation:fadeIn 0.8s ease 1.1s forwards, neonPulse 3s ease-in-out 2s infinite;
+  text-align:center;
+  line-height:1;
+}
+.splash-night{
+  font-size:clamp(14px,5vw,30px);
+  letter-spacing:0.35em;
+  color:var(--neon-red);
+  text-shadow:0 0 10px rgba(255,30,30,0.9);
+}
+@keyframes neonPulse{0%,100%{text-shadow:0 0 15px rgba(255,30,30,0.8),0 0 30px rgba(255,30,30,0.5)}50%{text-shadow:0 0 25px rgba(255,30,30,1),0 0 50px rgba(255,30,30,0.8),0 0 100px rgba(255,30,30,0.4)}}
+@keyframes fadeIn{to{opacity:1}}
+
+.splash-loader{
+  margin-top:32px;
+  display:flex;align-items:center;gap:8px;
+  opacity:0;animation:fadeIn 0.8s ease 1.8s forwards;
+}
+.loader-dot{
+  width:8px;height:8px;border-radius:50%;background:var(--gold);
+  animation:dotBounce 1.2s ease-in-out infinite;
+}
+.loader-dot:nth-child(2){animation-delay:0.2s}
+.loader-dot:nth-child(3){animation-delay:0.4s}
+@keyframes dotBounce{0%,80%,100%{transform:scale(0.8);opacity:0.4}40%{transform:scale(1.2);opacity:1}}
+
+/* ─── SCREENS ─── */
+#app{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--black)}
+.screen{display:none;flex-direction:column;height:100%;overflow-y:auto}
+.screen.active{display:flex}
+
+/* ─── LOGIN ─── */
+#loginScreen{
+  background:radial-gradient(ellipse at top, #2A0505 0%, #0D0000 50%, #000 100%);
+  align-items:center;justify-content:center;padding:24px;
+}
+.login-logo{text-align:center;margin-bottom:32px}
+.login-logo .suit-row{font-size:28px;letter-spacing:12px;opacity:0.6;margin-bottom:12px}
+.login-logo h1{
+  font-family:'Cinzel',serif;font-weight:900;font-size:clamp(28px,8vw,42px);
+  color:var(--gold);
+  text-shadow:0 0 20px rgba(255,215,0,0.4);
+  letter-spacing:0.08em;
+}
+.login-logo p{
+  font-family:'Cinzel',serif;font-size:clamp(10px,3vw,13px);
+  color:var(--gold3);letter-spacing:0.4em;margin-top:4px;
+}
+.login-card{
+  width:100%;max-width:360px;
+  background:linear-gradient(135deg, #1C0808, #100404);
+  border:1px solid rgba(255,215,0,0.25);
+  border-radius:12px;padding:28px 24px;
+  box-shadow:0 0 40px rgba(139,0,0,0.3),inset 0 1px 0 rgba(255,215,0,0.1);
+}
+.login-card h2{
+  font-family:'Cinzel',serif;font-size:16px;font-weight:600;
+  color:var(--gold3);letter-spacing:0.2em;text-align:center;
+  margin-bottom:20px;
+}
+.field-label{
+  font-size:11px;letter-spacing:0.25em;color:rgba(255,215,0,0.5);
+  text-transform:uppercase;margin-bottom:6px;display:block;
+}
+.casino-input{
+  width:100%;background:#0D0404;border:1px solid rgba(255,215,0,0.2);
+  border-radius:6px;padding:12px 16px;color:#fff;font-family:'Rajdhani',sans-serif;
+  font-size:16px;outline:none;transition:border-color 0.2s,box-shadow 0.2s;
+}
+.casino-input:focus{border-color:var(--gold3);box-shadow:0 0 0 2px rgba(255,215,0,0.1)}
+.casino-input::placeholder{color:rgba(255,255,255,0.2)}
+.btn-primary{
+  width:100%;background:linear-gradient(135deg,var(--red2),var(--red));
+  border:1px solid rgba(255,100,100,0.3);border-radius:6px;
+  padding:14px;font-family:'Cinzel',serif;font-size:14px;font-weight:600;
+  letter-spacing:0.15em;color:#fff;cursor:pointer;margin-top:16px;
+  transition:all 0.2s;text-transform:uppercase;
+  box-shadow:0 0 20px rgba(139,0,0,0.3);
+}
+.btn-primary:hover{background:linear-gradient(135deg,#CC2222,#AA0000);box-shadow:0 0 30px rgba(200,0,0,0.5);transform:translateY(-1px)}
+.btn-primary:active{transform:translateY(0)}
+.btn-secondary{
+  width:100%;background:transparent;border:1px solid rgba(255,215,0,0.2);
+  border-radius:6px;padding:12px;font-family:'Cinzel',serif;font-size:12px;
+  letter-spacing:0.15em;color:rgba(255,215,0,0.6);cursor:pointer;margin-top:10px;
+  transition:all 0.2s;text-transform:uppercase;
+}
+.btn-secondary:hover{border-color:rgba(255,215,0,0.5);color:var(--gold);background:rgba(255,215,0,0.05)}
+.admin-toggle{margin-top:10px;display:none}
+.admin-toggle.show{display:block}
+.divider-line{
+  height:1px;background:linear-gradient(90deg,transparent,rgba(255,215,0,0.2),transparent);
+  margin:20px 0;
+}
+.err-msg{color:#FF6B6B;font-size:12px;text-align:center;margin-top:8px;min-height:18px}
+
+/* ─── PLAYER SCREEN ─── */
+#playerScreen{
+  background:radial-gradient(ellipse at top, #1E0505 0%, #0A0000 60%, #000 100%);
+}
+.top-bar{
+  background:linear-gradient(180deg,#1C0808,#0D0404);
+  border-bottom:1px solid rgba(255,215,0,0.15);
+  padding:14px 16px 10px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+}
+.top-bar-logo{font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:var(--gold);letter-spacing:0.15em}
+.top-bar-sub{font-size:10px;color:rgba(255,215,0,0.4);letter-spacing:0.2em}
+.logout-btn{
+  background:transparent;border:1px solid rgba(255,255,255,0.1);border-radius:6px;
+  padding:6px 12px;color:rgba(255,255,255,0.4);font-size:11px;cursor:pointer;
+  font-family:'Rajdhani',sans-serif;letter-spacing:0.1em;transition:all 0.2s;
+}
+.logout-btn:hover{border-color:rgba(255,100,100,0.4);color:rgba(255,100,100,0.7)}
+
+.scroll-area{flex:1;overflow-y:auto;padding:16px;padding-bottom:32px}
+.scroll-area::-webkit-scrollbar{width:3px}
+.scroll-area::-webkit-scrollbar-thumb{background:rgba(255,215,0,0.2);border-radius:2px}
+
+/* Player card */
+.my-card{
+  background:linear-gradient(135deg, #220A0A, #180505);
+  border:1px solid rgba(255,215,0,0.3);
+  border-radius:12px;padding:20px;margin-bottom:20px;
+  box-shadow:0 0 30px rgba(139,0,0,0.2),inset 0 1px 0 rgba(255,215,0,0.08);
+  position:relative;overflow:hidden;
+}
+.my-card::before{
+  content:'';position:absolute;top:-50%;right:-20px;width:120px;height:200%;
+  background:linear-gradient(135deg,transparent,rgba(255,215,0,0.03),transparent);
+  transform:rotate(15deg);
+}
+.card-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.avatar{
+  width:44px;height:44px;border-radius:50%;
+  background:linear-gradient(135deg,var(--red),#4A0000);
+  border:2px solid rgba(255,215,0,0.4);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cinzel',serif;font-size:16px;font-weight:700;color:var(--gold);
+  flex-shrink:0;
+}
+.card-name{font-family:'Cinzel',serif;font-size:18px;font-weight:700;color:#fff;letter-spacing:0.05em}
+.card-role{font-size:11px;color:rgba(255,215,0,0.5);letter-spacing:0.2em;margin-top:2px}
+.chips-row{display:flex;align-items:baseline;gap:8px;margin-top:4px}
+.chips-count{
+  font-family:'Cinzel',serif;font-size:36px;font-weight:900;
+  color:var(--gold);
+  text-shadow:0 0 15px rgba(255,215,0,0.4);
+  transition:all 0.3s;
+}
+.chips-count.bump{animation:chipBump 0.4s ease}
+@keyframes chipBump{0%{transform:scale(1)}30%{transform:scale(1.2);color:#fff;text-shadow:0 0 25px rgba(255,215,0,0.9)}100%{transform:scale(1)}}
+.chips-label{font-size:13px;color:rgba(255,215,0,0.5);letter-spacing:0.15em}
+.chips-icon-row{display:flex;gap:6px;margin-top:10px}
+.chip-icon{
+  width:24px;height:24px;border-radius:50%;
+  border:2px dashed;display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;
+}
+.chip-icon.r{border-color:rgba(200,0,0,0.6);color:rgba(200,0,0,0.8)}
+.chip-icon.g{border-color:rgba(0,180,0,0.6);color:rgba(0,180,0,0.8)}
+.chip-icon.b{border-color:rgba(0,100,255,0.6);color:rgba(0,100,255,0.8)}
+
+/* Section */
+.section-header{
+  display:flex;align-items:center;gap:10px;margin-bottom:14px;
+}
+.section-title{font-family:'Cinzel',serif;font-size:13px;font-weight:600;color:var(--gold3);letter-spacing:0.25em}
+.section-line{flex:1;height:1px;background:linear-gradient(90deg,rgba(255,215,0,0.2),transparent)}
+
+/* Leaderboard */
+.player-row{
+  background:linear-gradient(90deg,#180505,#120303);
+  border:1px solid rgba(255,215,0,0.1);
+  border-radius:8px;padding:12px 14px;
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:8px;transition:all 0.2s;
+}
+.player-row:hover{border-color:rgba(255,215,0,0.25);background:linear-gradient(90deg,#200808,#180505)}
+.player-rank{
+  font-family:'Cinzel',serif;font-size:14px;font-weight:700;
+  color:rgba(255,215,0,0.3);width:22px;text-align:center;flex-shrink:0;
+}
+.player-rank.top{color:var(--gold);text-shadow:0 0 8px rgba(255,215,0,0.5)}
+.player-av{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,#3D0000,#1A0000);
+  border:1px solid rgba(255,215,0,0.2);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--gold3);
+}
+.player-info{flex:1;min-width:0}
+.player-name{font-size:14px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.player-you{font-size:10px;color:var(--neon-red);letter-spacing:0.15em;margin-left:6px}
+.player-chips{
+  font-family:'Cinzel',serif;font-size:15px;font-weight:700;color:var(--gold);
+  text-shadow:0 0 8px rgba(255,215,0,0.3);flex-shrink:0;
+}
+.rank-badge{
+  width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:12px;flex-shrink:0;
+}
+.rank-badge.gold{background:rgba(255,215,0,0.15);color:var(--gold);border:1px solid rgba(255,215,0,0.3)}
+.rank-badge.silver{background:rgba(192,192,192,0.1);color:#C0C0C0;border:1px solid rgba(192,192,192,0.2)}
+.rank-badge.bronze{background:rgba(205,127,50,0.1);color:#CD7F32;border:1px solid rgba(205,127,50,0.2)}
+.rank-badge.other{background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.3);border:1px solid rgba(255,255,255,0.1)}
+
+/* Float chips notification */
+.chip-notif{
+  position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+  background:rgba(0,0,0,0.85);border:1px solid var(--gold);border-radius:24px;
+  padding:10px 20px;font-family:'Cinzel',serif;font-size:14px;color:var(--gold);
+  pointer-events:none;opacity:0;transition:opacity 0.3s,bottom 0.5s;
+  z-index:1000;white-space:nowrap;
+}
+.chip-notif.show{opacity:1;bottom:100px}
+
+/* ─── ADMIN SCREEN ─── */
+#adminScreen{
+  background:radial-gradient(ellipse at top, #001A0D 0%, #000A05 60%, #000 100%);
+}
+.admin-bar{
+  background:linear-gradient(180deg,#001A0D,#000A05);
+  border-bottom:1px solid rgba(0,255,100,0.15);
+  padding:14px 16px 10px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+}
+.admin-bar-logo{
+  font-family:'Cinzel',serif;font-size:13px;font-weight:700;
+  color:#00FF66;letter-spacing:0.15em;
+  text-shadow:0 0 10px rgba(0,255,100,0.5);
+}
+.admin-bar-sub{font-size:10px;color:rgba(0,255,100,0.4);letter-spacing:0.2em}
+
+/* Admin player cards */
+.admin-player{
+  background:linear-gradient(135deg,#030F07,#020A05);
+  border:1px solid rgba(0,200,80,0.15);
+  border-radius:10px;padding:14px 16px;margin-bottom:10px;
+  transition:border-color 0.2s;
+}
+.admin-player:hover{border-color:rgba(0,200,80,0.3)}
+.admin-player-top{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.admin-av{
+  width:36px;height:36px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,#003D1A,#001A0A);
+  border:1px solid rgba(0,200,80,0.3);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:#00CC66;
+}
+.admin-name{font-size:14px;font-weight:600;color:#fff}
+.admin-joined{font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:0.1em}
+.admin-chips-display{
+  font-family:'Cinzel',serif;font-size:20px;font-weight:700;
+  color:#00FF66;text-shadow:0 0 10px rgba(0,255,100,0.3);
+  margin-left:auto;flex-shrink:0;
+}
+.admin-controls{display:flex;align-items:center;gap:8px}
+.ctrl-btn{
+  width:32px;height:32px;border-radius:6px;border:none;cursor:pointer;
+  font-size:18px;font-weight:700;display:flex;align-items:center;justify-content:center;
+  transition:all 0.15s;flex-shrink:0;
+}
+.ctrl-btn.minus{background:rgba(200,0,0,0.2);color:rgba(255,100,100,0.8);border:1px solid rgba(200,0,0,0.3)}
+.ctrl-btn.minus:hover{background:rgba(200,0,0,0.4);color:#fff}
+.ctrl-btn.plus{background:rgba(0,180,80,0.2);color:rgba(0,255,120,0.8);border:1px solid rgba(0,180,80,0.3)}
+.ctrl-btn.plus:hover{background:rgba(0,180,80,0.4);color:#fff}
+.ctrl-input{
+  flex:1;background:#030F07;border:1px solid rgba(0,200,80,0.2);border-radius:6px;
+  padding:8px 10px;color:#00FF66;font-family:'Cinzel',serif;font-size:16px;font-weight:700;
+  text-align:center;outline:none;min-width:0;
+}
+.ctrl-input:focus{border-color:rgba(0,255,100,0.5)}
+.ctrl-set-btn{
+  background:linear-gradient(135deg,#005A25,#003D1A);
+  border:1px solid rgba(0,200,80,0.3);border-radius:6px;
+  padding:8px 12px;color:#00FF66;font-family:'Cinzel',serif;
+  font-size:11px;font-weight:600;letter-spacing:0.1em;cursor:pointer;
+  transition:all 0.2s;white-space:nowrap;
+}
+.ctrl-set-btn:hover{background:linear-gradient(135deg,#007A35,#005A25)}
+
+.admin-stats{
+  display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;
+}
+.stat-card{
+  background:linear-gradient(135deg,#030F07,#020A05);
+  border:1px solid rgba(0,200,80,0.15);border-radius:10px;padding:14px;text-align:center;
+}
+.stat-val{font-family:'Cinzel',serif;font-size:22px;font-weight:700;color:#00FF66;text-shadow:0 0 8px rgba(0,255,100,0.3)}
+.stat-lab{font-size:10px;color:rgba(0,200,80,0.5);letter-spacing:0.2em;margin-top:4px}
+
+/* Suit decorations on admin */
+.admin-suits{font-size:20px;letter-spacing:8px;color:rgba(0,255,100,0.15);text-align:center;margin-bottom:16px}
+
+/* Scrollbar admin */
+#adminScreen .scroll-area::-webkit-scrollbar-thumb{background:rgba(0,200,80,0.2)}
+
+/* ─── FLOATING CHIPS ANIMATION ─── */
+.float-chip{
+  position:fixed;pointer-events:none;z-index:9998;
+  font-family:'Cinzel',serif;font-size:14px;font-weight:700;
+  animation:floatUp 1.2s ease forwards;
+}
+@keyframes floatUp{
+  0%{opacity:1;transform:translateY(0) scale(1)}
+  100%{opacity:0;transform:translateY(-80px) scale(0.7)}
+}
+
+/* ─── UTILS ─── */
+.gold-separator{
+  display:flex;align-items:center;gap:10px;margin:16px 0;
+}
+.gold-separator span{font-size:16px;color:rgba(255,215,0,0.3)}
+.gold-separator::before,.gold-separator::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(255,215,0,0.2),transparent)}
+.empty-state{text-align:center;padding:32px 16px;color:rgba(255,255,255,0.2);font-size:14px;letter-spacing:0.1em}
+.empty-icon{font-size:40px;margin-bottom:12px;opacity:0.3}
+
+/* Responsive tweaks */
+@media(min-width:480px){
+  .login-card{padding:36px 32px}
+  .my-card{padding:24px}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════ SPLASH ══════ -->
+<div id="splash">
+  <div class="splash-cards">
+    <div class="splash-card">♠</div>
+    <div class="splash-card">♥</div>
+    <div class="splash-card">♣</div>
+    <div class="splash-card">♦</div>
+    <div class="splash-card">♠</div>
+    <div class="splash-card">♥</div>
+  </div>
+  <div class="splash-chips">
+    <div class="chip"></div>
+    <div class="chip"></div>
+    <div class="chip"></div>
+    <div class="chip"></div>
+  </div>
+  <div class="splash-divider-top"></div>
+  <p class="splash-subtitle">Bem-vindo ao</p>
+  <div class="splash-title">
+    <div>CASINO</div>
+    <div class="splash-night">NIGHT</div>
+  </div>
+  <p class="splash-presents">Aniversário de</p>
+  <div class="splash-name">Matheus</div>
+  <div class="splash-divider-bot"></div>
+  <div class="splash-loader">
+    <div class="loader-dot"></div>
+    <div class="loader-dot"></div>
+    <div class="loader-dot"></div>
+  </div>
+</div>
+
+<!-- ══════ APP ══════ -->
+<div id="app">
+
+  <!-- LOGIN -->
+  <div id="loginScreen" class="screen active">
+    <div class="login-logo">
+      <div class="suit-row">♠ ♥ ♣ ♦</div>
+      <h1>Casino Night</h1>
+      <p>Aniversário Matheus</p>
+    </div>
+    <div class="login-card">
+      <h2>♠ Entrar na Mesa ♠</h2>
+      <label class="field-label">Seu nome</label>
+      <input id="nameInput" class="casino-input" type="text" placeholder="Como te chamam?" maxlength="30" autocomplete="off">
+      <button class="btn-primary" onclick="enterAsPlayer()">🎰 Entrar na Sala</button>
+      <div class="divider-line"></div>
+      <button class="btn-secondary" onclick="toggleAdmin()">🔐 Entrar como Administrador</button>
+      <div id="adminToggle" class="admin-toggle">
+        <label class="field-label" style="margin-top:12px">Senha do admin</label>
+        <input id="adminPass" class="casino-input" type="password" placeholder="••••••••" autocomplete="off">
+        <button class="btn-primary" style="background:linear-gradient(135deg,#004A20,#003010);border-color:rgba(0,200,80,0.3)" onclick="enterAsAdmin()">✅ Confirmar Acesso</button>
+      </div>
+      <div id="errMsg" class="err-msg"></div>
+    </div>
+  </div>
+
+  <!-- PLAYER -->
+  <div id="playerScreen" class="screen">
+    <div class="top-bar">
+      <div>
+        <div class="top-bar-logo">🎰 Casino Night</div>
+        <div class="top-bar-sub">Aniversário Matheus</div>
+      </div>
+      <button class="logout-btn" onclick="logout()">Sair</button>
+    </div>
+    <div class="scroll-area">
+      <!-- My card -->
+      <div class="my-card">
+        <div class="card-header">
+          <div class="avatar" id="myAvatar">?</div>
+          <div>
+            <div class="card-name" id="myName">–</div>
+            <div class="card-role">Jogador da Mesa</div>
+          </div>
+        </div>
+        <div class="chips-row">
+          <div class="chips-count" id="myChips">0</div>
+          <div class="chips-label">FICHAS</div>
+        </div>
+        <div class="chips-icon-row">
+          <div class="chip-icon r">25</div>
+          <div class="chip-icon g">50</div>
+          <div class="chip-icon b">100</div>
+        </div>
+      </div>
+
+      <!-- Leaderboard -->
+      <div class="section-header">
+        <span class="section-title">♠ Placar da Mesa</span>
+        <div class="section-line"></div>
+      </div>
+      <div id="leaderboard"></div>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div id="adminScreen" class="screen">
+    <div class="admin-bar">
+      <div>
+        <div class="admin-bar-logo">⚙️ Painel Admin</div>
+        <div class="admin-bar-sub">Controle do Casino</div>
+      </div>
+      <button class="logout-btn" style="border-color:rgba(0,200,80,0.15);color:rgba(0,200,80,0.4)" onclick="logout()">Sair</button>
+    </div>
+    <div class="scroll-area" style="padding-top:20px">
+      <div class="admin-stats" id="adminStats"></div>
+      <div class="admin-suits">♠ ♥ ♣ ♦</div>
+      <div class="section-header">
+        <span class="section-title" style="color:#00CC66">⚙ Gerenciar Jogadores</span>
+        <div class="section-line" style="background:linear-gradient(90deg,rgba(0,200,80,0.2),transparent)"></div>
+      </div>
+      <div id="adminPlayers"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Notification -->
+<div class="chip-notif" id="chipNotif"></div>
+
+<script>
+const ADMIN_PASS = 'cassino21';
+const DEFAULT_CHIPS = 100;
+const CHIPS_STEP = 10;
+
+// ── Data helpers ──
+function getPlayers(){try{return JSON.parse(localStorage.getItem('cn_players')||'[]')}catch{return[]}}
+function savePlayers(arr){localStorage.setItem('cn_players',JSON.stringify(arr))}
+function getSession(){return localStorage.getItem('cn_session')}
+function setSession(name){localStorage.setItem('cn_session',name)}
+function clearSession(){localStorage.removeItem('cn_session')}
+
+function findPlayer(name){return getPlayers().find(p=>p.nome.toLowerCase()===name.toLowerCase())}
+function initials(name){return name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase().slice(0,2)||'?'}
+
+// ── Notifications ──
+function notify(msg,color='#FFD700'){
+  const el=document.getElementById('chipNotif');
+  el.textContent=msg;el.style.color=color;el.style.borderColor=color;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2200);
+}
+function spawnFloat(text,color,x,y){
+  const el=document.createElement('div');
+  el.className='float-chip';el.textContent=text;
+  el.style.cssText=`left:${x}px;top:${y}px;color:${color}`;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1300);
+}
+
+// ── Splash ──
+window.addEventListener('load',()=>{
+  // Check if already logged in
+  const sess=getSession();
+  setTimeout(()=>{
+    const splash=document.getElementById('splash');
+    splash.classList.add('out');
+    setTimeout(()=>{
+      splash.style.display='none';
+      if(sess){
+        const players=getPlayers();
+        const me=players.find(p=>p.nome.toLowerCase()===sess.toLowerCase());
+        if(me) return showPlayer(me.nome);
+      }
+    },800);
+  },3200);
+});
+
+// ── Login ──
+function toggleAdmin(){
+  const el=document.getElementById('adminToggle');
+  el.classList.toggle('show');
+  if(el.classList.contains('show')) document.getElementById('adminPass').focus();
+}
+function setErr(msg){document.getElementById('errMsg').textContent=msg}
+
+function enterAsPlayer(){
+  const name=document.getElementById('nameInput').value.trim();
+  if(!name){setErr('Digite seu nome para continuar');return}
+  let players=getPlayers();
+  let player=findPlayer(name);
+  if(!player){
+    player={nome:name,fichas:DEFAULT_CHIPS};
+    players.push(player);
+    savePlayers(players);
+  }
+  setSession(name);
+  showPlayer(name);
+}
+
+function enterAsAdmin(){
+  const pass=document.getElementById('adminPass').value;
+  if(pass!==ADMIN_PASS){setErr('Senha incorreta. Tente novamente.');return}
+  setSession('__admin__');
+  showAdmin();
+}
+
+document.getElementById('nameInput').addEventListener('keydown',e=>{if(e.key==='Enter')enterAsPlayer()});
+document.getElementById('adminPass') && document.getElementById('adminPass').addEventListener('keydown',e=>{if(e.key==='Enter')enterAsAdmin()});
+
+// ── Screens ──
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function logout(){clearSession();showScreen('loginScreen');document.getElementById('nameInput').value='';setErr('')}
+
+function showPlayer(name){
+  setSession(name);
+  showScreen('playerScreen');
+  renderPlayer(name);
+}
+
+function renderPlayer(name){
+  const players=getPlayers();
+  const me=players.find(p=>p.nome.toLowerCase()===name.toLowerCase());
+  if(!me)return;
+  document.getElementById('myAvatar').textContent=initials(me.nome);
+  document.getElementById('myName').textContent=me.nome;
+  const chipsEl=document.getElementById('myChips');
+  if(chipsEl.textContent!==String(me.fichas)){
+    chipsEl.textContent=me.fichas;
+    chipsEl.classList.remove('bump');
+    void chipsEl.offsetWidth;
+    chipsEl.classList.add('bump');
+  }
+  // Leaderboard
+  const sorted=[...players].sort((a,b)=>b.fichas-a.fichas);
+  const lb=document.getElementById('leaderboard');
+  if(!sorted.length){lb.innerHTML='<div class="empty-state"><div class="empty-icon">♣</div><div>Nenhum jogador ainda</div></div>';return}
+  lb.innerHTML=sorted.map((p,i)=>{
+    const isMe=p.nome.toLowerCase()===name.toLowerCase();
+    const badges=['🥇','🥈','🥉'];
+    const badgeCls=['gold','silver','bronze','other'];
+    const bc=badgeCls[Math.min(i,3)];
+    return`<div class="player-row">
+      <div class="player-rank${i<3?' top':''}">${i+1}</div>
+      <div class="player-av">${initials(p.nome)}</div>
+      <div class="player-info">
+        <div class="player-name">${p.nome}${isMe?'<span class="player-you">VOCÊ</span>':''}</div>
+      </div>
+      ${i<3?`<div class="rank-badge ${bc}">${badges[i]}</div>`:''}
+      <div class="player-chips">${p.fichas}</div>
+    </div>`;
+  }).join('');
+}
+
+function showAdmin(){
+  showScreen('adminScreen');
+  renderAdmin();
+}
+
+function renderAdmin(){
+  const players=getPlayers();
+  // Stats
+  const total=players.reduce((s,p)=>s+p.fichas,0);
+  const max=players.length?Math.max(...players.map(p=>p.fichas)):0;
+  const leader=players.length?players.find(p=>p.fichas===max):{nome:'–'};
+  document.getElementById('adminStats').innerHTML=`
+    <div class="stat-card"><div class="stat-val">${players.length}</div><div class="stat-lab">JOGADORES</div></div>
+    <div class="stat-card"><div class="stat-val">${total}</div><div class="stat-lab">FICHAS TOTAIS</div></div>
+    <div class="stat-card"><div class="stat-val">${max}</div><div class="stat-lab">MAIOR STACK</div></div>
+    <div class="stat-card"><div class="stat-val" style="font-size:14px">${leader.nome||'–'}</div><div class="stat-lab">LÍDER</div></div>
+  `;
+  if(!players.length){
+    document.getElementById('adminPlayers').innerHTML='<div class="empty-state"><div class="empty-icon">♦</div><div>Nenhum jogador cadastrado</div></div>';
+    return;
+  }
+  const sorted=[...players].sort((a,b)=>b.fichas-a.fichas);
+  document.getElementById('adminPlayers').innerHTML=sorted.map(p=>`
+    <div class="admin-player">
+      <div class="admin-player-top">
+        <div class="admin-av">${initials(p.nome)}</div>
+        <div>
+          <div class="admin-name">${p.nome}</div>
+          <div class="admin-joined">Jogador ativo</div>
+        </div>
+        <div class="admin-chips-display">${p.fichas}</div>
+      </div>
+      <div class="admin-controls">
+        <button class="ctrl-btn minus" onclick="adjustChips('${p.nome}',-${CHIPS_STEP},event)">−</button>
+        <input class="ctrl-input" type="number" value="${p.fichas}" min="0" id="inp_${encodeURIComponent(p.nome)}" onchange="">
+        <button class="ctrl-btn plus" onclick="adjustChips('${p.nome}',${CHIPS_STEP},event)">+</button>
+        <button class="ctrl-set-btn" onclick="setChipsManual('${p.nome}')">Definir</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function adjustChips(nome,delta,evt){
+  let players=getPlayers();
+  const idx=players.findIndex(p=>p.nome===nome);
+  if(idx<0)return;
+  players[idx].fichas=Math.max(0,players[idx].fichas+delta);
+  savePlayers(players);
+  // Animate float
+  if(evt){
+    const rect=evt.target.getBoundingClientRect();
+    const color=delta>0?'#00FF66':'#FF4444';
+    spawnFloat((delta>0?'+':'')+delta,color,rect.left,rect.top);
+  }
+  notify(`${nome}: ${delta>0?'+':''} ${delta} fichas`,delta>0?'#00FF66':'#FF6666');
+  renderAdmin();
+  // Refresh player screen if it's that player
+  const sess=getSession();
+  if(sess&&sess!=='__admin__'&&sess.toLowerCase()===nome.toLowerCase()) renderPlayer(nome);
+}
+
+function setChipsManual(nome){
+  const key=encodeURIComponent(nome);
+  const inp=document.getElementById('inp_'+key);
+  if(!inp)return;
+  const val=Math.max(0,parseInt(inp.value)||0);
+  let players=getPlayers();
+  const idx=players.findIndex(p=>p.nome===nome);
+  if(idx<0)return;
+  players[idx].fichas=val;
+  savePlayers(players);
+  notify(`${nome}: fichas definidas como ${val}`,'#FFD700');
+  renderAdmin();
+}
+
+// Refresh every 5s if on player screen
+setInterval(()=>{
+  const sess=getSession();
+  if(!sess||sess==='__admin__')return;
+  const active=document.querySelector('.screen.active');
+  if(active&&active.id==='playerScreen') renderPlayer(sess);
+},5000);
+</script>
+</body>
+</html>
