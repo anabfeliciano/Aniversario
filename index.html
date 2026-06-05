@@ -133,7 +133,7 @@ html,body{height:100%;overflow:hidden;background:var(--black);font-family:'Rajdh
 @keyframes dotBounce{0%,80%,100%{transform:scale(0.8);opacity:0.4}40%{transform:scale(1.2);opacity:1}}
 
 /* ─── SCREENS ─── */
-#app{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--black)}
+.app{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--black)}
 .screen{display:none;flex-direction:column;height:100%;overflow-y:auto}
 .screen.active{display:flex}
 
@@ -248,7 +248,7 @@ html,body{height:100%;overflow:hidden;background:var(--black);font-family:'Rajdh
   font-family:'Cinzel',serif;font-size:16px;font-weight:700;color:var(--gold);
   flex-shrink:0;
 }
-.card-name{font-family:'Cinzel',serif;font-size:18px;font-weight:700;color:#fff;letter-spacing:0.05em}
+.card-name{font-size:18px;font-weight:700;color:#fff;letter-spacing:0.05em}
 .card-role{font-size:11px;color:rgba(255,215,0,0.5);letter-spacing:0.2em;margin-top:2px}
 .chips-row{display:flex;align-items:baseline;gap:8px;margin-top:4px}
 .chips-count{
@@ -435,7 +435,6 @@ html,body{height:100%;overflow:hidden;background:var(--black);font-family:'Rajdh
 </head>
 <body>
 
-<!-- ══════ SPLASH ══════ -->
 <div id="splash">
   <div class="splash-cards">
     <div class="splash-card">♠</div>
@@ -467,10 +466,8 @@ html,body{height:100%;overflow:hidden;background:var(--black);font-family:'Rajdh
   </div>
 </div>
 
-<!-- ══════ APP ══════ -->
-<div id="app">
+<div id="app" class="app">
 
-  <!-- LOGIN -->
   <div id="loginScreen" class="screen active">
     <div class="login-logo">
       <div class="suit-row">♠ ♥ ♣ ♦</div>
@@ -493,7 +490,6 @@ html,body{height:100%;overflow:hidden;background:var(--black);font-family:'Rajdh
     </div>
   </div>
 
-  <!-- PLAYER -->
   <div id="playerScreen" class="screen">
     <div class="top-bar">
       <div>
@@ -503,7 +499,6 @@ html,body{height:100%;overflow:hidden;background:var(--black);font-family:'Rajdh
       <button class="logout-btn" onclick="logout()">Sair</button>
     </div>
     <div class="scroll-area">
-      <!-- My card -->
       <div class="my-card">
         <div class="card-header">
           <div class="avatar" id="myAvatar">?</div>
@@ -523,7 +518,6 @@ html,body{height:100%;overflow:hidden;background:var(--black);font-family:'Rajdh
         </div>
       </div>
 
-      <!-- Leaderboard -->
       <div class="section-header">
         <span class="section-title">♠ Placar da Mesa</span>
         <div class="section-line"></div>
@@ -532,7 +526,6 @@ html,body{height:100%;overflow:hidden;background:var(--black);font-family:'Rajdh
     </div>
   </div>
 
-  <!-- ADMIN -->
   <div id="adminScreen" class="screen">
     <div class="admin-bar">
       <div>
@@ -554,31 +547,47 @@ html,body{height:100%;overflow:hidden;background:var(--black);font-family:'Rajdh
 
 </div>
 
-<!-- Notification -->
 <div class="chip-notif" id="chipNotif"></div>
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+// Configuração oficial extraída do seu painel do Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyDBgaszxH53zD3ka9RT5zKesq5m4iBxI8E",
+  authDomain: "cassino-matheus.firebaseapp.com",
+  databaseURL: "https://cassino-matheus-default-rtdb.firebaseio.com",
+  projectId: "cassino-matheus",
+  storageBucket: "cassino-matheus.firebasestorage.app",
+  messagingSenderId: "306948759718",
+  appId: "1:306948759718:web:fdfc9c7522d7abdd47d467",
+  measurementId: "G-NMTZ89SLXF"
+};
+
+// Inicializa o Firebase
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
 const ADMIN_PASS = 'cassino21';
 const DEFAULT_CHIPS = 100;
 const CHIPS_STEP = 10;
 
-// ── Data helpers ──
-function getPlayers(){try{return JSON.parse(localStorage.getItem('cn_players')||'[]')}catch{return[]}}
-function savePlayers(arr){localStorage.setItem('cn_players',JSON.stringify(arr))}
+let globalPlayers = {};
+
 function getSession(){return localStorage.getItem('cn_session')}
 function setSession(name){localStorage.setItem('cn_session',name)}
-function clearSession(){localStorage.removeItem('cn_session')}
-
-function findPlayer(name){return getPlayers().find(p=>p.nome.toLowerCase()===name.toLowerCase())}
+function clearSession(){removeItem('cn_session')}
 function initials(name){return name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase().slice(0,2)||'?'}
 
-// ── Notifications ──
-function notify(msg,color='#FFD700'){
+window.notify = function(msg,color='#FFD700'){
   const el=document.getElementById('chipNotif');
+  if(!el) return;
   el.textContent=msg;el.style.color=color;el.style.borderColor=color;
   el.classList.add('show');
   setTimeout(()=>el.classList.remove('show'),2200);
 }
+
 function spawnFloat(text,color,x,y){
   const el=document.createElement('div');
   el.className='float-chip';el.textContent=text;
@@ -587,9 +596,21 @@ function spawnFloat(text,color,x,y){
   setTimeout(()=>el.remove(),1300);
 }
 
-// ── Splash ──
+// Sincronização em tempo real do Firebase
+const playersRef = ref(db, 'players');
+onValue(playersRef, (snapshot) => {
+  globalPlayers = snapshot.val() || {};
+  const sess = getSession();
+  if (sess) {
+    if (sess === '__admin__') {
+      renderAdmin();
+    } else {
+      renderPlayer(sess);
+    }
+  }
+});
+
 window.addEventListener('load',()=>{
-  // Check if already logged in
   const sess=getSession();
   setTimeout(()=>{
     const splash=document.getElementById('splash');
@@ -597,76 +618,98 @@ window.addEventListener('load',()=>{
     setTimeout(()=>{
       splash.style.display='none';
       if(sess){
-        const players=getPlayers();
-        const me=players.find(p=>p.nome.toLowerCase()===sess.toLowerCase());
-        if(me) return showPlayer(me.nome);
+        if(sess === '__admin__') {
+          showAdmin();
+        } else {
+          showPlayer(sess);
+        }
       }
     },800);
   },3200);
 });
 
-// ── Login ──
-function toggleAdmin(){
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+window.logout = function(){
+  localStorage.removeItem('cn_session');
+  showScreen('loginScreen');
+  document.getElementById('nameInput').value='';
+  setErr('');
+}
+
+window.toggleAdmin = function(){
   const el=document.getElementById('adminToggle');
   el.classList.toggle('show');
   if(el.classList.contains('show')) document.getElementById('adminPass').focus();
 }
+
 function setErr(msg){document.getElementById('errMsg').textContent=msg}
 
-function enterAsPlayer(){
-  const name=document.getElementById('nameInput').value.trim();
+window.enterAsPlayer = function() {
+  const nameInput = document.getElementById('nameInput').value.trim();
+  const name = nameInput.replace(/[\.\#\$\[\]]/g, ""); 
+  
   if(!name){setErr('Digite seu nome para continuar');return}
-  let players=getPlayers();
-  let player=findPlayer(name);
-  if(!player){
-    player={nome:name,fichas:DEFAULT_CHIPS};
-    players.push(player);
-    savePlayers(players);
+  
+  const playerKey = name.toLowerCase();
+  
+  if (!globalPlayers[playerKey]) {
+    set(ref(db, 'players/' + playerKey), {
+      nome: name,
+      fichas: DEFAULT_CHIPS
+    }).then(() => {
+      setSession(name);
+      showPlayer(name);
+    });
+  } else {
+    setSession(globalPlayers[playerKey].nome);
+    showPlayer(globalPlayers[playerKey].nome);
   }
-  setSession(name);
-  showPlayer(name);
 }
 
-function enterAsAdmin(){
+window.enterAsAdmin = function(){
   const pass=document.getElementById('adminPass').value;
   if(pass!==ADMIN_PASS){setErr('Senha incorreta. Tente novamente.');return}
   setSession('__admin__');
   showAdmin();
 }
 
-document.getElementById('nameInput').addEventListener('keydown',e=>{if(e.key==='Enter')enterAsPlayer()});
-document.getElementById('adminPass') && document.getElementById('adminPass').addEventListener('keydown',e=>{if(e.key==='Enter')enterAsAdmin()});
-
-// ── Screens ──
-function showScreen(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-function logout(){clearSession();showScreen('loginScreen');document.getElementById('nameInput').value='';setErr('')}
+document.getElementById('nameInput').addEventListener('keydown',e=>{if(e.key==='Enter')window.enterAsPlayer()});
+document.getElementById('adminPass').addEventListener('keydown',e=>{if(e.key==='Enter')window.enterAsAdmin()});
 
 function showPlayer(name){
-  setSession(name);
   showScreen('playerScreen');
   renderPlayer(name);
 }
 
 function renderPlayer(name){
-  const players=getPlayers();
-  const me=players.find(p=>p.nome.toLowerCase()===name.toLowerCase());
-  if(!me)return;
+  const playerKey = name.toLowerCase();
+  const me = globalPlayers[playerKey];
+  if(!me) return;
+
   document.getElementById('myAvatar').textContent=initials(me.nome);
   document.getElementById('myName').textContent=me.nome;
   const chipsEl=document.getElementById('myChips');
+  
   if(chipsEl.textContent!==String(me.fichas)){
     chipsEl.textContent=me.fichas;
     chipsEl.classList.remove('bump');
     void chipsEl.offsetWidth;
     chipsEl.classList.add('bump');
   }
-  // Leaderboard
-  const sorted=[...players].sort((a,b)=>b.fichas-a.fichas);
+
+  const playersArr = Object.values(globalPlayers);
+  const sorted = playersArr.sort((a,b)=>b.fichas-a.fichas);
   const lb=document.getElementById('leaderboard');
-  if(!sorted.length){lb.innerHTML='<div class="empty-state"><div class="empty-icon">♣</div><div>Nenhum jogador ainda</div></div>';return}
+  
+  if(!sorted.length){
+    lb.innerHTML='<div class="empty-state"><div class="empty-icon">♣</div><div>Nenhum jogador ainda</div></div>';
+    return;
+  }
+  
   lb.innerHTML=sorted.map((p,i)=>{
     const isMe=p.nome.toLowerCase()===name.toLowerCase();
     const badges=['🥇','🥈','🥉'];
@@ -690,23 +733,28 @@ function showAdmin(){
 }
 
 function renderAdmin(){
-  const players=getPlayers();
-  // Stats
-  const total=players.reduce((s,p)=>s+p.fichas,0);
-  const max=players.length?Math.max(...players.map(p=>p.fichas)):0;
-  const leader=players.length?players.find(p=>p.fichas===max):{nome:'–'};
+  const playersArr = Object.values(globalPlayers);
+  
+  const total=playersArr.reduce((s,p)=>s+p.fichas,0);
+  const max=playersArr.length?Math.max(...playersArr.map(p=>p.fichas)):0;
+  const leader=playersArr.length?playersArr.find(p=>p.fichas===max):{nome:'–'};
+  
   document.getElementById('adminStats').innerHTML=`
-    <div class="stat-card"><div class="stat-val">${players.length}</div><div class="stat-lab">JOGADORES</div></div>
+    <div class="stat-card"><div class="stat-val">${playersArr.length}</div><div class="stat-lab">JOGADORES</div></div>
     <div class="stat-card"><div class="stat-val">${total}</div><div class="stat-lab">FICHAS TOTAIS</div></div>
     <div class="stat-card"><div class="stat-val">${max}</div><div class="stat-lab">MAIOR STACK</div></div>
     <div class="stat-card"><div class="stat-val" style="font-size:14px">${leader.nome||'–'}</div><div class="stat-lab">LÍDER</div></div>
   `;
-  if(!players.length){
+  
+  if(!playersArr.length){
     document.getElementById('adminPlayers').innerHTML='<div class="empty-state"><div class="empty-icon">♦</div><div>Nenhum jogador cadastrado</div></div>';
     return;
   }
-  const sorted=[...players].sort((a,b)=>b.fichas-a.fichas);
-  document.getElementById('adminPlayers').innerHTML=sorted.map(p=>`
+  
+  const sorted = playersArr.sort((a,b)=>b.fichas-a.fichas);
+  document.getElementById('adminPlayers').innerHTML=sorted.map(p=>{
+    const pKey = p.nome.toLowerCase();
+    return `
     <div class="admin-player">
       <div class="admin-player-top">
         <div class="admin-av">${initials(p.nome)}</div>
@@ -717,55 +765,43 @@ function renderAdmin(){
         <div class="admin-chips-display">${p.fichas}</div>
       </div>
       <div class="admin-controls">
-        <button class="ctrl-btn minus" onclick="adjustChips('${p.nome}',-${CHIPS_STEP},event)">−</button>
-        <input class="ctrl-input" type="number" value="${p.fichas}" min="0" id="inp_${encodeURIComponent(p.nome)}" onchange="">
-        <button class="ctrl-btn plus" onclick="adjustChips('${p.nome}',${CHIPS_STEP},event)">+</button>
-        <button class="ctrl-set-btn" onclick="setChipsManual('${p.nome}')">Definir</button>
+        <button class="ctrl-btn minus" onclick="window.adjustChips('${p.nome}',-${CHIPS_STEP},event)">−</button>
+        <input class="ctrl-input" type="number" value="${p.fichas}" min="0" id="inp_${encodeURIComponent(pKey)}">
+        <button class="ctrl-btn plus" onclick="window.adjustChips('${p.nome}',${CHIPS_STEP},event)">+</button>
+        <button class="ctrl-set-btn" onclick="window.setChipsManual('${p.nome}')">Definir</button>
       </div>
     </div>
-  `).join('');
+  `}).join('');
 }
 
-function adjustChips(nome,delta,evt){
-  let players=getPlayers();
-  const idx=players.findIndex(p=>p.nome===nome);
-  if(idx<0)return;
-  players[idx].fichas=Math.max(0,players[idx].fichas+delta);
-  savePlayers(players);
-  // Animate float
-  if(evt){
-    const rect=evt.target.getBoundingClientRect();
-    const color=delta>0?'#00FF66':'#FF4444';
-    spawnFloat((delta>0?'+':'')+delta,color,rect.left,rect.top);
-  }
-  notify(`${nome}: ${delta>0?'+':''} ${delta} fichas`,delta>0?'#00FF66':'#FF6666');
-  renderAdmin();
-  // Refresh player screen if it's that player
-  const sess=getSession();
-  if(sess&&sess!=='__admin__'&&sess.toLowerCase()===nome.toLowerCase()) renderPlayer(nome);
+window.adjustChips = function(nome,delta,evt){
+  const pKey = nome.toLowerCase();
+  const player = globalPlayers[pKey];
+  if(!player) return;
+  
+  const novasFichas = Math.max(0, player.fichas + delta);
+  
+  set(ref(db, 'players/' + pKey + '/fichas'), novasFichas).then(() => {
+    if(evt){
+      const rect=evt.target.getBoundingClientRect();
+      const color=delta>0?'#00FF66':'#FF4444';
+      spawnFloat((delta>0?'+':'')+delta,color,rect.left,rect.top);
+    }
+    window.notify(`${nome}: ${delta>0?'+':''} ${delta} fichas`, delta>0?'#00FF66':'#FF6666');
+  });
 }
 
-function setChipsManual(nome){
-  const key=encodeURIComponent(nome);
-  const inp=document.getElementById('inp_'+key);
-  if(!inp)return;
-  const val=Math.max(0,parseInt(inp.value)||0);
-  let players=getPlayers();
-  const idx=players.findIndex(p=>p.nome===nome);
-  if(idx<0)return;
-  players[idx].fichas=val;
-  savePlayers(players);
-  notify(`${nome}: fichas definidas como ${val}`,'#FFD700');
-  renderAdmin();
+window.setChipsManual = function(nome){
+  const pKey = nome.toLowerCase();
+  const inp = document.getElementById('inp_' + encodeURIComponent(pKey));
+  if(!inp) return;
+  
+  const val = Math.max(0, parseInt(inp.value) || 0);
+  
+  set(ref(db, 'players/' + pKey + '/fichas'), val).then(() => {
+    window.notify(`${nome}: fichas definidas como ${val}`,'#FFD700');
+  });
 }
-
-// Refresh every 5s if on player screen
-setInterval(()=>{
-  const sess=getSession();
-  if(!sess||sess==='__admin__')return;
-  const active=document.querySelector('.screen.active');
-  if(active&&active.id==='playerScreen') renderPlayer(sess);
-},5000);
 </script>
 </body>
 </html>
